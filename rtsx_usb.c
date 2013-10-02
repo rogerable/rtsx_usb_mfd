@@ -39,9 +39,20 @@ static struct mfd_cell rtsx_usb_cells[] = {
 	},
 };
 
+static void rtsx_usb_sg_timed_out(unsigned long data)
+{
+	struct rtsx_ucr *ucr = (struct rtsx_ucr *)data;
+
+	dev_dbg(&ucr->pusb_intf->dev, "%s: sg transfer timed out", __func__);
+	usb_sg_cancel(&ucr->current_sg);
+
+	/* we know the cancellation is caused by time-out */
+	ucr->current_sg.status = -ETIMEDOUT;
+}
+
 static int rtsx_usb_bulk_transfer_sglist(struct rtsx_ucr *ucr, unsigned int pipe,
 		struct scatterlist *sg, int num_sg, unsigned int length,
-		unsigned int *act_len)
+		unsigned int *act_len, int timeout)
 {
 	int ret;
 
@@ -52,7 +63,10 @@ static int rtsx_usb_bulk_transfer_sglist(struct rtsx_ucr *ucr, unsigned int pipe
 	if (ret)
 		return ret;
 
+	ucr->sg_timer.expires = jiffies + msecs_to_jiffies(timeout);
+	add_timer(&ucr->sg_timer);
 	usb_sg_wait(&ucr->current_sg);
+	del_timer(&ucr->sg_timer);
 
 	if (act_len)
 		*act_len = ucr->current_sg.bytes;
@@ -68,13 +82,11 @@ int rtsx_usb_transfer_data(struct rtsx_ucr *ucr, unsigned int pipe,
 		timeout = 600;
 	}
 	
-	if (num_sg) {
-		/* Try to ignore timeout when sglist */
+	if (num_sg)
 		return rtsx_usb_bulk_transfer_sglist(ucr, pipe, (struct scatterlist *)buf, 
-				num_sg, len, act_len);
-	} else {
+				num_sg, len, act_len, timeout);
+	else
 		return usb_bulk_msg(ucr->pusb_dev, pipe, buf, len, act_len, timeout);
-	}
 }
 EXPORT_SYMBOL_GPL(rtsx_usb_transfer_data);
 
@@ -646,7 +658,9 @@ static int rtsx_usb_probe(struct usb_interface *intf,
 
 	if (ret)
 		goto out_init_fail;
-	
+	/* initialize USB SG transfer timer */
+	init_timer(&ucr->sg_timer);
+	setup_timer(&ucr->sg_timer, rtsx_usb_sg_timed_out, (unsigned long) ucr);
 #ifdef CONFIG_PM
 	intf->needs_remote_wakeup = 1;
 	usb_enable_autosuspend(usb_dev);

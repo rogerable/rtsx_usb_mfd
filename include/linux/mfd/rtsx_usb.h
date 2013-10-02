@@ -70,6 +70,7 @@ struct rtsx_ucr {
 	unsigned char		*iobuf;	 
 	dma_addr_t		iobuf_dma;
 
+	struct timer_list	sg_timer;
 	struct mutex		dev_mutex;
 };
 
