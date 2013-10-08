@@ -648,7 +648,6 @@ static int rtsx_usb_probe(struct usb_interface *intf,
 
 	mutex_init(&ucr->dev_mutex);
 
-	ucr->usb2 = (usb_dev->speed == USB_SPEED_HIGH) ? 1 : 0;
 	ucr->pusb_intf = intf;
 
 	/* initialize */

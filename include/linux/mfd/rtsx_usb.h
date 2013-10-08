@@ -54,7 +54,6 @@ struct rtsx_ucr {
 #define LQFP48			1
 #define CHECK_PKG(ucr, pkg)	((ucr)->package == (pkg))
 
-	int			usb2;
 	u8			ic_version;
 	u8			is_rts5179;
 
