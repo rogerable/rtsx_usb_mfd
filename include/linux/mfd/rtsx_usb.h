@@ -46,28 +46,28 @@
 
 /* data structures */
 struct rtsx_ucr {
-	u16 			vendor_id;
-	u16 			product_id;
-	
-	int 			package;
+	u16			vendor_id;
+	u16			product_id;
+
+	int			package;
 #define QFN24			0
 #define LQFP48			1
 #define CHECK_PKG(ucr, pkg)	((ucr)->package == (pkg))
-	
-	int 			usb2;
-	u8 			ic_version;
+
+	int			usb2;
+	u8			ic_version;
 	u8			is_rts5179;
 
-	unsigned int 		cur_clk;
+	unsigned int		cur_clk;
 
-	u8 			*cmd_buf;
-	unsigned int 		cmd_idx;
-	u8 			*rsp_buf;
+	u8			*cmd_buf;
+	unsigned int		cmd_idx;
+	u8			*rsp_buf;
 
 	struct usb_device	*pusb_dev;
 	struct usb_interface	*pusb_intf;
 	struct usb_sg_request	current_sg;
-	unsigned char		*iobuf;	 
+	unsigned char		*iobuf;
 	dma_addr_t		iobuf_dma;
 
 	struct timer_list	sg_timer;
@@ -95,8 +95,8 @@ extern void rtsx_usb_add_cmd(struct rtsx_ucr *ucr, u8 cmd_type,
 		u16 reg_addr, u8 mask, u8 data);
 extern int rtsx_usb_send_cmd(struct rtsx_ucr *ucr, u8 flag, int timeout);
 extern int rtsx_usb_get_rsp(struct rtsx_ucr *ucr, int rsp_len, int timeout);
-extern int rtsx_usb_transfer_data(struct rtsx_ucr *ucr, unsigned int pipe, 
-			      void *buf, unsigned int len, int use_sg, 
+extern int rtsx_usb_transfer_data(struct rtsx_ucr *ucr, unsigned int pipe,
+			      void *buf, unsigned int len, int use_sg,
 			      unsigned int *act_len, int timeout);
 
 extern int rtsx_usb_read_ppbuf(struct rtsx_ucr *ucr, u8 *buf, int buf_len);
@@ -130,8 +130,8 @@ extern int rtsx_usb_card_exclusive_check(struct rtsx_ucr *ucr, int card);
 #define STAGE_R			0x01
 #define STAGE_DI		0x02
 #define STAGE_DO		0x04
-#define STAGE_MS_STATUS		0x08	
-#define STAGE_XD_STATUS		0x10	
+#define STAGE_MS_STATUS		0x08
+#define STAGE_XD_STATUS		0x10
 #define MODE_C			0x00
 #define MODE_CR			(STAGE_R)
 #define MODE_CDIR		(STAGE_R | STAGE_DI)
@@ -331,7 +331,7 @@ static inline void rtsx_usb_init_cmd(struct rtsx_ucr *ucr)
 #define CLK_MODE_48M_OSC		0x03
 
 /* CFG_MODE_1*/
-#define RTS5179 			0x02
+#define RTS5179			0x02
 
 #define NYET_EN				0x01
 #define NYET_MSAK			0x01
@@ -425,7 +425,7 @@ static inline void rtsx_usb_init_cmd(struct rtsx_ucr *ucr)
 #define	SD_TM_AUTO_WRITE_4		0x02
 #define	SD_TM_AUTO_READ_3		0x05
 #define	SD_TM_AUTO_READ_4		0x06
-#define	SD_TM_CMD_RSP			0x08		
+#define	SD_TM_CMD_RSP			0x08
 #define	SD_TM_AUTO_WRITE_1		0x09
 #define	SD_TM_AUTO_WRITE_2		0x0A
 #define	SD_TM_NORMAL_READ		0x0C
@@ -453,27 +453,27 @@ static inline void rtsx_usb_init_cmd(struct rtsx_ucr *ucr)
 #define	SD_NO_CHECK_CRC16		0x40
 #define SD_WAIT_CRC_TO_EN		0x20
 #define	SD_WAIT_BUSY_END		0x08
-#define	SD_NO_WAIT_BUSY_END		0x00	
+#define	SD_NO_WAIT_BUSY_END		0x00
 #define	SD_CHECK_CRC7			0x00
 #define	SD_NO_CHECK_CRC7		0x04
 #define	SD_RSP_LEN_0			0x00
 #define	SD_RSP_LEN_6			0x01
 #define	SD_RSP_LEN_17			0x02
-#define	SD_RSP_TYPE_R0			0x04	 
-#define	SD_RSP_TYPE_R1			0x01	
-#define	SD_RSP_TYPE_R1b			0x09	
-#define	SD_RSP_TYPE_R2			0x02	
-#define	SD_RSP_TYPE_R3			0x05	
-#define	SD_RSP_TYPE_R4			0x05	
-#define	SD_RSP_TYPE_R5			0x01	
-#define	SD_RSP_TYPE_R6			0x01	
+#define	SD_RSP_TYPE_R0			0x04
+#define	SD_RSP_TYPE_R1			0x01
+#define	SD_RSP_TYPE_R1b			0x09
+#define	SD_RSP_TYPE_R2			0x02
+#define	SD_RSP_TYPE_R3			0x05
+#define	SD_RSP_TYPE_R4			0x05
+#define	SD_RSP_TYPE_R5			0x01
+#define	SD_RSP_TYPE_R6			0x01
 #define	SD_RSP_TYPE_R7			0x01
 
 /* SD_STAT1 */
 #define	SD_CRC7_ERR			0x80
 #define	SD_CRC16_ERR			0x40
 #define	SD_CRC_WRITE_ERR		0x20
-#define	SD_CRC_WRITE_ERR_MASK	    	0x1C
+#define	SD_CRC_WRITE_ERR_MASK		0x1C
 #define	GET_CRC_TIME_OUT		0x02
 #define	SD_TUNING_COMPARE_ERR		0x01
 
@@ -506,29 +506,29 @@ static inline void rtsx_usb_init_cmd(struct rtsx_ucr *ucr)
 #define SAMPLE_VAR_CLK1			(0x02 << 4)
 
 /* SD_SAMPLE_POINT_CTL */
-#define	DDR_FIX_RX_DAT			0x00 
-#define	DDR_VAR_RX_DAT			0x80 
-#define	DDR_FIX_RX_DAT_EDGE		0x00 
-#define	DDR_FIX_RX_DAT_14_DELAY		0x40 
-#define	DDR_FIX_RX_CMD			0x00 
-#define	DDR_VAR_RX_CMD			0x20 
-#define	DDR_FIX_RX_CMD_POS_EDGE		0x00 
-#define	DDR_FIX_RX_CMD_14_DELAY		0x10 
-#define	SD20_RX_POS_EDGE		0x00 
+#define	DDR_FIX_RX_DAT			0x00
+#define	DDR_VAR_RX_DAT			0x80
+#define	DDR_FIX_RX_DAT_EDGE		0x00
+#define	DDR_FIX_RX_DAT_14_DELAY		0x40
+#define	DDR_FIX_RX_CMD			0x00
+#define	DDR_VAR_RX_CMD			0x20
+#define	DDR_FIX_RX_CMD_POS_EDGE		0x00
+#define	DDR_FIX_RX_CMD_14_DELAY		0x10
+#define	SD20_RX_POS_EDGE		0x00
 #define	SD20_RX_14_DELAY		0x08
 #define SD20_RX_SEL_MASK		0x08
 
 /* SD_PUSH_POINT_CTL */
-#define	DDR_FIX_TX_CMD_DAT		0x00 
-#define	DDR_VAR_TX_CMD_DAT		0x80 
-#define	DDR_FIX_TX_DAT_14_TSU		0x00 
-#define	DDR_FIX_TX_DAT_12_TSU		0x40 
-#define	DDR_FIX_TX_CMD_NEG_EDGE		0x00 
-#define	DDR_FIX_TX_CMD_14_AHEAD		0x20 
+#define	DDR_FIX_TX_CMD_DAT		0x00
+#define	DDR_VAR_TX_CMD_DAT		0x80
+#define	DDR_FIX_TX_DAT_14_TSU		0x00
+#define	DDR_FIX_TX_DAT_12_TSU		0x40
+#define	DDR_FIX_TX_CMD_NEG_EDGE		0x00
+#define	DDR_FIX_TX_CMD_14_AHEAD		0x20
 #define	SD20_TX_NEG_EDGE		0x00
 #define	SD20_TX_14_AHEAD		0x10
 #define SD20_TX_SEL_MASK		0x10
-#define	DDR_VAR_SDCLK_POL_SWAP		0x01 
+#define	DDR_VAR_SDCLK_POL_SWAP		0x01
 
 /* MS_CFG */
 #define	SAMPLE_TIME_RISING		0x00
@@ -550,12 +550,12 @@ static inline void rtsx_usb_init_cmd(struct rtsx_ucr *ucr)
 #define	WAIT_INT			0x80
 #define	NO_WAIT_INT			0x00
 #define	NO_AUTO_READ_INT_REG		0x00
-#define	AUTO_READ_INT_REG		0x40	
+#define	AUTO_READ_INT_REG		0x40
 #define	MS_CRC16_ERR			0x20
 #define	MS_RDY_TIMEOUT			0x10
 #define	MS_INT_CMDNK			0x08
 #define	MS_INT_BREQ			0x04
-#define	MS_INT_ERR			0x02 
+#define	MS_INT_ERR			0x02
 #define	MS_INT_CED			0x01
 
 /* MS_TRANSFER */

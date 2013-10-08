@@ -50,14 +50,14 @@ static void rtsx_usb_sg_timed_out(unsigned long data)
 	ucr->current_sg.status = -ETIMEDOUT;
 }
 
-static int rtsx_usb_bulk_transfer_sglist(struct rtsx_ucr *ucr, unsigned int pipe,
-		struct scatterlist *sg, int num_sg, unsigned int length,
-		unsigned int *act_len, int timeout)
+static int rtsx_usb_bulk_transfer_sglist(struct rtsx_ucr *ucr,
+		unsigned int pipe, struct scatterlist *sg, int num_sg,
+		unsigned int length, unsigned int *act_len, int timeout)
 {
 	int ret;
 
-	dev_dbg(&ucr->pusb_intf->dev, "%s: xfer %u bytes, %d entries\n", __func__,
-			length, num_sg);
+	dev_dbg(&ucr->pusb_intf->dev, "%s: xfer %u bytes, %d entries\n",
+			__func__, length, num_sg);
 	ret = usb_sg_init(&ucr->current_sg, ucr->pusb_dev, pipe, 0,
 			sg, num_sg, length, GFP_NOIO);
 	if (ret)
@@ -74,19 +74,20 @@ static int rtsx_usb_bulk_transfer_sglist(struct rtsx_ucr *ucr, unsigned int pipe
 	return ucr->current_sg.status;
 }
 
-int rtsx_usb_transfer_data(struct rtsx_ucr *ucr, unsigned int pipe, 
-			      void *buf, unsigned int len, int num_sg, 
+int rtsx_usb_transfer_data(struct rtsx_ucr *ucr, unsigned int pipe,
+			      void *buf, unsigned int len, int num_sg,
 			      unsigned int *act_len, int timeout)
 {
-	if (timeout < 600) {
+	if (timeout < 600)
 		timeout = 600;
-	}
-	
+
 	if (num_sg)
-		return rtsx_usb_bulk_transfer_sglist(ucr, pipe, (struct scatterlist *)buf, 
-				num_sg, len, act_len, timeout);
+		return rtsx_usb_bulk_transfer_sglist(ucr, pipe,
+				(struct scatterlist *)buf, num_sg, len, act_len,
+				timeout);
 	else
-		return usb_bulk_msg(ucr->pusb_dev, pipe, buf, len, act_len, timeout);
+		return usb_bulk_msg(ucr->pusb_dev, pipe, buf, len, act_len,
+				timeout);
 }
 EXPORT_SYMBOL_GPL(rtsx_usb_transfer_data);
 
@@ -94,16 +95,16 @@ static int rtsx_usb_seq_write_register(struct rtsx_ucr *ucr,
 		u16 addr, u16 len, u8 *data)
 {
 	u16 cmd_len = len + 12;
-	
+
 	if (data == NULL)
 		return -EINVAL;
-	
+
 	cmd_len = (cmd_len <= CMD_BUF_LEN) ? cmd_len : CMD_BUF_LEN;
-	
-	if (cmd_len % 4) {
+
+	if (cmd_len % 4)
 		cmd_len += (4 - cmd_len % 4);
-	}
-	
+
+
 	ucr->cmd_buf[0] = 'R';
 	ucr->cmd_buf[1] = 'T';
 	ucr->cmd_buf[2] = 'C';
@@ -114,11 +115,11 @@ static int rtsx_usb_seq_write_register(struct rtsx_ucr *ucr,
 	ucr->cmd_buf[STAGE_FLAG] = 0;
 	ucr->cmd_buf[8] = (u8)(addr >> 8);
 	ucr->cmd_buf[9] = (u8)addr;
-	
+
 	memcpy(ucr->cmd_buf + 12, data, len);
-	
+
 	return rtsx_usb_transfer_data(ucr,
-			usb_sndbulkpipe(ucr->pusb_dev, EP_BULK_OUT), 
+			usb_sndbulkpipe(ucr->pusb_dev, EP_BULK_OUT),
 			(void *)(ucr->cmd_buf),
 			cmd_len, 0, NULL, 100);
 }
@@ -128,16 +129,15 @@ static int rtsx_usb_seq_read_register(struct rtsx_ucr *ucr,
 {
 	int ret;
 	u16 rsp_len;
-	
+
 	if (data == NULL)
 		return -EINVAL;
-	
-	if (len % 4) {
+
+	if (len % 4)
 		rsp_len = len + (4 - len % 4);
-	} else {
+	else
 		rsp_len = len;
-	}
-	
+
 	ucr->cmd_buf[0] = 'R';
 	ucr->cmd_buf[1] = 'T';
 	ucr->cmd_buf[2] = 'C';
@@ -148,16 +148,16 @@ static int rtsx_usb_seq_read_register(struct rtsx_ucr *ucr,
 	ucr->cmd_buf[STAGE_FLAG] = STAGE_R;
 	ucr->cmd_buf[8] = (u8)(addr >> 8);
 	ucr->cmd_buf[9] = (u8)addr;
-	
-	ret = rtsx_usb_transfer_data(ucr, usb_sndbulkpipe(ucr->pusb_dev, EP_BULK_OUT),
-				      (void *)(ucr->cmd_buf),
-				      12, 0, NULL, 100);
+
+	ret = rtsx_usb_transfer_data(ucr,
+			usb_sndbulkpipe(ucr->pusb_dev, EP_BULK_OUT),
+			(void *)(ucr->cmd_buf), 12, 0, NULL, 100);
 	if (ret)
 		return ret;
-	
-	return rtsx_usb_transfer_data(ucr, usb_rcvbulkpipe(ucr->pusb_dev, EP_BULK_IN), 
-				       (void *)data,
-				       rsp_len, 0, NULL, 100);
+
+	return rtsx_usb_transfer_data(ucr,
+			usb_rcvbulkpipe(ucr->pusb_dev, EP_BULK_IN),
+			(void *)data, rsp_len, 0, NULL, 100);
 }
 int rtsx_usb_read_ppbuf(struct rtsx_ucr *ucr, u8 *buf, int buf_len)
 {
@@ -171,7 +171,8 @@ int rtsx_usb_write_ppbuf(struct rtsx_ucr *ucr, u8 *buf, int buf_len)
 }
 EXPORT_SYMBOL_GPL(rtsx_usb_write_ppbuf);
 
-int rtsx_usb_ep0_write_register(struct rtsx_ucr *ucr, u16 addr, u8 mask, u8 data)
+int rtsx_usb_ep0_write_register(struct rtsx_ucr *ucr, u16 addr,
+		u8 mask, u8 data)
 {
 	u16 value = 0, index = 0;
 
@@ -180,7 +181,7 @@ int rtsx_usb_ep0_write_register(struct rtsx_ucr *ucr, u16 addr, u8 mask, u8 data
 	value = ((value << 8) & 0xFF00) | ((value >> 8) & 0x00FF);
 	index |= (u16)mask;
 	index |= (u16)data << 8;
-	
+
 	return usb_control_msg(ucr->pusb_dev,
 			usb_sndctrlpipe(ucr->pusb_dev, 0), 0, 0x40,
 			value, index, NULL, 0, 100);
@@ -190,7 +191,7 @@ EXPORT_SYMBOL_GPL(rtsx_usb_ep0_write_register);
 int rtsx_usb_ep0_read_register(struct rtsx_ucr *ucr, u16 addr, u8 *data)
 {
 	u16 value = 0;
-	
+
 	if (data == NULL)
 		return -EINVAL;
 	*data = 0;
@@ -198,17 +199,17 @@ int rtsx_usb_ep0_read_register(struct rtsx_ucr *ucr, u16 addr, u8 *data)
 	value |= (u16)(2 & 0x03) << 14;
 	value |= (u16)(addr & 0x3FFF);
 	value = ((value << 8) & 0xFF00) | ((value >> 8) & 0x00FF);
-	
+
 	return usb_control_msg(ucr->pusb_dev,
 			usb_rcvctrlpipe(ucr->pusb_dev, 0), 0, 0xC0,
 			value, 0, data, 1, 100);
 }
 EXPORT_SYMBOL_GPL(rtsx_usb_ep0_read_register);
 
-void rtsx_usb_add_cmd(struct rtsx_ucr *ucr, 
-		    u8 cmd_type, 
-		    u16 reg_addr, 
-		    u8 mask, 
+void rtsx_usb_add_cmd(struct rtsx_ucr *ucr,
+		    u8 cmd_type,
+		    u16 reg_addr,
+		    u8 mask,
 		    u8 data)
 {
 	int i;
@@ -216,12 +217,13 @@ void rtsx_usb_add_cmd(struct rtsx_ucr *ucr,
 	if (ucr->cmd_idx < ((CMD_BUF_LEN - CMD_OFFSET) / 4)) {
 		i = CMD_OFFSET + ucr->cmd_idx * 4;
 
-		ucr->cmd_buf[i++] = ((cmd_type & 0x03) << 6) | (u8)((reg_addr >> 8) & 0x3F);
+		ucr->cmd_buf[i++] = ((cmd_type & 0x03) << 6) |
+			(u8)((reg_addr >> 8) & 0x3F);
 		ucr->cmd_buf[i++] = (u8)reg_addr;
 		ucr->cmd_buf[i++] = mask;
 		ucr->cmd_buf[i++] = data;
 
-		ucr->cmd_idx ++;
+		ucr->cmd_idx++;
 	}
 }
 EXPORT_SYMBOL_GPL(rtsx_usb_add_cmd);
@@ -229,21 +231,21 @@ EXPORT_SYMBOL_GPL(rtsx_usb_add_cmd);
 int rtsx_usb_send_cmd(struct rtsx_ucr *ucr, u8 flag, int timeout)
 {
 	int ret;
-	
+
 	ucr->cmd_buf[CNT_H] = (u8)(ucr->cmd_idx >> 8);
 	ucr->cmd_buf[CNT_L] = (u8)(ucr->cmd_idx);
 	ucr->cmd_buf[STAGE_FLAG] = flag;
-	
-	ret = rtsx_usb_transfer_data(ucr, usb_sndbulkpipe(ucr->pusb_dev, EP_BULK_OUT), 
-					  (void *)(ucr->cmd_buf), 
-					  ucr->cmd_idx * 4 + CMD_OFFSET, 
-					  0, NULL, timeout);
+
+	ret = rtsx_usb_transfer_data(ucr,
+			usb_sndbulkpipe(ucr->pusb_dev, EP_BULK_OUT),
+			(void *)(ucr->cmd_buf), ucr->cmd_idx * 4 + CMD_OFFSET,
+			0, NULL, timeout);
 	if (ret) {
 		/* clear HW error*/
 		rtsx_usb_ep0_write_register(ucr, SFSM_ED, 0xf8, 0xf8);
 		return ret;
-	}                             
-	
+	}
+
 	return 0;
 }
 EXPORT_SYMBOL_GPL(rtsx_usb_send_cmd);
@@ -252,30 +254,29 @@ int rtsx_usb_get_rsp(struct rtsx_ucr *ucr, int rsp_len, int timeout)
 {
 	if (rsp_len <= 0)
 		return -EINVAL;
-	
-	if (rsp_len % 4) {
-		rsp_len += (4 - rsp_len % 4);
-	}
 
-	return rtsx_usb_transfer_data(ucr, usb_rcvbulkpipe(ucr->pusb_dev, EP_BULK_IN), 
-					   (void *)ucr->rsp_buf, rsp_len, 
-					   0, NULL, timeout);
+	if (rsp_len % 4)
+		rsp_len += (4 - rsp_len % 4);
+
+	return rtsx_usb_transfer_data(ucr,
+			usb_rcvbulkpipe(ucr->pusb_dev, EP_BULK_IN),
+			(void *)ucr->rsp_buf, rsp_len, 0, NULL, timeout);
 }
 EXPORT_SYMBOL_GPL(rtsx_usb_get_rsp);
 
 static int rtsx_usb_get_status_with_bulk(struct rtsx_ucr *ucr, u16 *status)
 {
 	int ret;
-	
+
 	rtsx_usb_init_cmd(ucr);
 	rtsx_usb_add_cmd(ucr, READ_REG_CMD, CARD_EXIST, 0x00, 0x00);
 	rtsx_usb_add_cmd(ucr, READ_REG_CMD, OCPSTAT, 0x00, 0x00);
 	ret = rtsx_usb_send_cmd(ucr, MODE_CR, 100);
-	if(ret)
+	if (ret)
 		return ret;
 
 	ret = rtsx_usb_get_rsp(ucr, 2, 100);
-	if(ret)
+	if (ret)
 		return ret;
 
 	*status = (u16)((ucr->rsp_buf[0] >> 2) & 0x0f) |
@@ -292,7 +293,8 @@ int rtsx_usb_get_card_status(struct rtsx_ucr *ucr, u16 *status)
 		return -EINVAL;
 
 	if (polling_pipe == 0)
-		ret = usb_control_msg(ucr->pusb_dev, usb_rcvctrlpipe(ucr->pusb_dev, 0),
+		ret = usb_control_msg(ucr->pusb_dev,
+				usb_rcvctrlpipe(ucr->pusb_dev, 0),
 				0x02, 0xC0, 0, 0, status, 2, 100);
 	else
 		ret = rtsx_usb_get_status_with_bulk(ucr, status);
@@ -307,20 +309,22 @@ EXPORT_SYMBOL_GPL(rtsx_usb_get_card_status);
 
 int rtsx_usb_write_phy_register(struct rtsx_ucr *ucr, u8 addr, u8 val)
 {
-	dev_dbg(&ucr->pusb_intf->dev, "Write 0x%x to phy register 0x%x\n", val, addr);
-	
+	dev_dbg(&ucr->pusb_intf->dev, "Write 0x%x to phy register 0x%x\n",
+			val, addr);
+
 	rtsx_usb_init_cmd(ucr);
-	
+
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, HS_VSTAIN, 0xFF, val);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, HS_VCONTROL, 0xFF, addr & 0x0F);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, HS_VLOADM, 0xFF, 0x00);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, HS_VLOADM, 0xFF, 0x00);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, HS_VLOADM, 0xFF, 0x01);
-	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, HS_VCONTROL, 0xFF, (addr >> 4) & 0x0F);
+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, HS_VCONTROL,
+			0xFF, (addr >> 4) & 0x0F);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, HS_VLOADM, 0xFF, 0x00);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, HS_VLOADM, 0xFF, 0x00);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, HS_VLOADM, 0xFF, 0x01);
-	
+
 	return rtsx_usb_send_cmd(ucr, MODE_C, 100);
 }
 
@@ -335,7 +339,7 @@ EXPORT_SYMBOL_GPL(rtsx_usb_write_register);
 int rtsx_usb_read_register(struct rtsx_ucr *ucr, u16 addr, u8 *data)
 {
 	int ret;
-	
+
 	if (data != NULL)
 		*data = 0;
 
@@ -344,14 +348,14 @@ int rtsx_usb_read_register(struct rtsx_ucr *ucr, u16 addr, u8 *data)
 	ret = rtsx_usb_send_cmd(ucr, MODE_CR, 100);
 	if (ret)
 		return ret;
-	
+
 	ret = rtsx_usb_get_rsp(ucr, 1, 100);
 	if (ret)
 		return ret;
-	
+
 	if (data != NULL)
 		*data = ucr->rsp_buf[0];
-	
+
 	return 0;
 }
 EXPORT_SYMBOL_GPL(rtsx_usb_read_register);
@@ -399,7 +403,7 @@ int rtsx_usb_switch_clock(struct rtsx_ucr *ucr, unsigned int card_clock,
 
 	card_clock /= 1000000;
 	dev_dbg(&ucr->pusb_intf->dev,
-			"Switch card clock to %dMHz\n",card_clock);
+			"Switch card clock to %dMHz\n", card_clock);
 
 	if (!initial_mode && double_clk)
 		card_clock *= 2;
@@ -503,7 +507,7 @@ static int rtsx_usb_reset_chip(struct rtsx_ucr *ucr)
 
 	rtsx_usb_init_cmd(ucr);
 
-	if (CHECK_PKG(ucr, LQFP48)) { 
+	if (CHECK_PKG(ucr, LQFP48)) {
 		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PWR_CTL,
 				LDO3318_PWR_MASK, LDO_SUSPEND);
 		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PWR_CTL,
@@ -518,23 +522,25 @@ static int rtsx_usb_reset_chip(struct rtsx_ucr *ucr)
 
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, SYS_DUMMY0, NYET_MSAK, NYET_EN);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CD_DEGLITCH_WIDTH, 0xFF, 0x08);
-	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CD_DEGLITCH_EN, XD_CD_DEGLITCH_EN, 0x0);
+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+			CD_DEGLITCH_EN, XD_CD_DEGLITCH_EN, 0x0);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, SD30_DRIVE_SEL,
 			SD30_DRIVE_MASK, DRIVER_TYPE_D);
-	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_DRIVE_SEL, SD20_DRIVE_MASK, 0x0);
+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+			CARD_DRIVE_SEL, SD20_DRIVE_MASK, 0x0);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, LDO_POWER_CFG, 0xE0, 0x0);
 
-	if (ucr->is_rts5179) {
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL5, 0x03, 0x01);
-	}
+	if (ucr->is_rts5179)
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL5, 0x03, 0x01);
 
-	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_DMA1_CTL, 
+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_DMA1_CTL,
 		       EXTEND_DMA1_ASYNC_SIGNAL, EXTEND_DMA1_ASYNC_SIGNAL);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_INT_PEND,
 			XD_INT | MS_INT | SD_INT,
 			XD_INT | MS_INT | SD_INT);
 
-	ret= rtsx_usb_send_cmd(ucr, MODE_C, 100);
+	ret = rtsx_usb_send_cmd(ucr, MODE_C, 100);
 	if (ret)
 		return ret;
 
@@ -556,9 +562,10 @@ static int rtsx_usb_init_chip(struct rtsx_ucr *ucr)
 
 	/* clear HW error*/
 	rtsx_usb_ep0_write_register(ucr, SFSM_ED, 0xf8, 0xf8);
-	
-	/* power on SSC*/	
-	ret = rtsx_usb_write_register(ucr, FPDCTL, SSC_POWER_MASK, SSC_POWER_ON);
+
+	/* power on SSC*/
+	ret = rtsx_usb_write_register(ucr,
+			FPDCTL, SSC_POWER_MASK, SSC_POWER_ON);
 	if (ret)
 		goto err_out;
 
@@ -615,7 +622,7 @@ static int rtsx_usb_probe(struct usb_interface *intf,
 	dev_dbg(&intf->dev,
 		": Realtek USB Card Reader found at bus %03d address %03d\n",
 		 usb_dev->bus->busnum, usb_dev->devnum);
-	
+
 	ucr = kzalloc(sizeof(struct rtsx_ucr), GFP_KERNEL);
 	if (!ucr) {
 		dev_err(&intf->dev, "Out of memory\n");
@@ -634,14 +641,14 @@ static int rtsx_usb_probe(struct usb_interface *intf,
 
 	/* set USB interface data */
 	usb_set_intfdata(intf, ucr);
-	
+
 	ucr->vendor_id = id->idVendor;
 	ucr->product_id = id->idProduct;
 	ucr->cmd_buf = ucr->rsp_buf = ucr->iobuf;
 
 	mutex_init(&ucr->dev_mutex);
 
-	ucr->usb2 = (usb_dev->speed == USB_SPEED_HIGH)? 1 : 0;
+	ucr->usb2 = (usb_dev->speed == USB_SPEED_HIGH) ? 1 : 0;
 	ucr->pusb_intf = intf;
 
 	/* initialize */
@@ -752,7 +759,7 @@ static struct usb_device_id rtsx_usb_usb_ids[] = {
 	{ USB_DEVICE(0x0BDA, 0x0129) },
 	{ USB_DEVICE(0x0BDA, 0x0139) },
 	{ USB_DEVICE(0x0BDA, 0x0140) },
-	{ }		
+	{ }
 };
 
 struct usb_driver rtsx_usb_driver = {

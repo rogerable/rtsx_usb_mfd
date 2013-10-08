@@ -39,7 +39,7 @@ struct rtsx_usb_ms {
 	struct mutex		host_mutex;
 	struct work_struct	handle_req;
 
-	struct task_struct 	*detect_ms;
+	struct task_struct	*detect_ms;
 	struct completion	detect_ms_exit;
 
 	u8			ssc_depth;
@@ -56,12 +56,12 @@ static inline struct device *ms_dev(struct rtsx_usb_ms *host)
 static inline void ms_clear_error(struct rtsx_usb_ms *host)
 {
 	struct rtsx_ucr *ucr = host->ucr;
-	rtsx_usb_ep0_write_register(ucr, CARD_STOP, 
-				  MS_STOP | MS_CLR_ERR, 
+	rtsx_usb_ep0_write_register(ucr, CARD_STOP,
+				  MS_STOP | MS_CLR_ERR,
 				  MS_STOP | MS_CLR_ERR);
-	
-	rtsx_usb_ep0_write_register(ucr,MC_FIFO_CTL,FIFO_FLUSH,FIFO_FLUSH);
-	rtsx_usb_ep0_write_register(ucr,MC_DMA_RST,DMA_RESET,DMA_RESET);
+
+	rtsx_usb_ep0_write_register(ucr, MC_FIFO_CTL, FIFO_FLUSH, FIFO_FLUSH);
+	rtsx_usb_ep0_write_register(ucr, MC_DMA_RST, DMA_RESET, DMA_RESET);
 	rtsx_usb_ep0_write_register(ucr, SFSM_ED, 0xf8, 0xf8);
 }
 
@@ -121,19 +121,31 @@ static int ms_pull_ctl_disable(struct rtsx_ucr *ucr)
 	rtsx_usb_init_cmd(ucr);
 
 	if (CHECK_PKG(ucr, LQFP48)) {
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL1, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL2, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL3, 0xFF, 0x95);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL4, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL5, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL6, 0xFF, 0xA5);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL1, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL2, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL3, 0xFF, 0x95);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL4, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL5, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL6, 0xFF, 0xA5);
 	} else {
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL1, 0xFF, 0x65);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL2, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL3, 0xFF, 0x95);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL4, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL5, 0xFF, 0x56);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL6, 0xFF, 0x59);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL1, 0xFF, 0x65);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL2, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL3, 0xFF, 0x95);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL4, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL5, 0xFF, 0x56);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL6, 0xFF, 0x59);
 	}
 
 	return rtsx_usb_send_cmd(ucr, MODE_C, 100);
@@ -144,19 +156,31 @@ static int ms_pull_ctl_enable(struct rtsx_ucr *ucr)
 	rtsx_usb_init_cmd(ucr);
 
 	if (CHECK_PKG(ucr, LQFP48)) {
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL1, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL2, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL3, 0xFF, 0x95);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL4, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL5, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL6, 0xFF, 0xA5);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL1, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL2, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL3, 0xFF, 0x95);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL4, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL5, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL6, 0xFF, 0xA5);
 	} else {
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL1, 0xFF, 0x65);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL2, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL3, 0xFF, 0x95);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL4, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL5, 0xFF, 0x55);
-		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PULL_CTL6, 0xFF, 0x59);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL1, 0xFF, 0x65);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL2, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL3, 0xFF, 0x95);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL4, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL5, 0xFF, 0x55);
+		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+				CARD_PULL_CTL6, 0xFF, 0x59);
 	}
 
 	return rtsx_usb_send_cmd(ucr, MODE_C, 100);
@@ -183,7 +207,7 @@ static int ms_power_on(struct rtsx_usb_ms *host)
 	if (err < 0)
 		return err;
 
-	err = rtsx_usb_write_register(ucr, CARD_PWR_CTL, 
+	err = rtsx_usb_write_register(ucr, CARD_PWR_CTL,
 			POWER_MASK, PARTIAL_POWER_ON);
 	if (err)
 		return err;
@@ -192,8 +216,10 @@ static int ms_power_on(struct rtsx_usb_ms *host)
 	usleep_range(800, 1000);
 
 	rtsx_usb_init_cmd(ucr);
-	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PWR_CTL, POWER_MASK, POWER_ON);
-	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_OE, MS_OUTPUT_EN, MS_OUTPUT_EN);
+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PWR_CTL,
+			POWER_MASK, POWER_ON);
+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_OE,
+			MS_OUTPUT_EN, MS_OUTPUT_EN);
 
 	return rtsx_usb_send_cmd(ucr, MODE_C, 100);
 }
@@ -252,10 +278,14 @@ static int ms_transfer_data(struct rtsx_usb_ms *host, unsigned char data_dir,
 			0xFF, (u8)sec_cnt);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MS_TRANS_CFG, 0xFF, cfg);
 
-	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC3, 0xFF, (u8)(length >> 24));
-	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC2, 0xFF, (u8)(length >> 16));
-	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC1, 0xFF, (u8)(length >> 8));
-	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC0, 0xFF, (u8)length);
+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC3,
+			0xFF, (u8)(length >> 24));
+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC2,
+			0xFF, (u8)(length >> 16));
+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC1,
+			0xFF, (u8)(length >> 8));
+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC0, 0xFF,
+			(u8)length);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_CTL,
 			0x03 | DMA_PACK_SIZE_MASK, dma_dir | DMA_EN | DMA_512);
 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_DATA_SOURCE,
@@ -279,10 +309,9 @@ static int ms_transfer_data(struct rtsx_usb_ms *host, unsigned char data_dir,
 	if (err)
 		goto err_out;
 
-	if ((ucr->rsp_buf[0] & MS_TRANSFER_ERR) || 
-			(ucr->rsp_buf[1] & (MS_INT_CMDNK 
-			| MS_INT_ERR | MS_CRC16_ERR | MS_RDY_TIMEOUT)))
-	{
+	if ((ucr->rsp_buf[0] & MS_TRANSFER_ERR) ||
+			(ucr->rsp_buf[1] & (MS_INT_CMDNK
+			| MS_INT_ERR | MS_CRC16_ERR | MS_RDY_TIMEOUT))) {
 		err = -EIO;
 		goto err_out;
 	}
@@ -554,23 +583,17 @@ static int rtsx_usb_ms_set_param(struct memstick_host *msh,
 	case MEMSTICK_POWER:
 		if (value == MEMSTICK_POWER_ON) {
 #ifdef CONFIG_PM_RUNTIME
-			if (pm_runtime_suspended(ms_dev(host))) {
+			if (pm_runtime_suspended(ms_dev(host)))
 				ret = pm_runtime_get_sync(ms_dev(host));
-				dev_dbg(ms_dev(host), "%s: pm_runtime_get_sync: %d\n", __func__, ret);
-			}
 #endif
 			err = ms_power_on(host);
-		}
-		else if (value == MEMSTICK_POWER_OFF) {
+		} else if (value == MEMSTICK_POWER_OFF) {
 			err = ms_power_off(host);
 #ifdef CONFIG_PM_RUNTIME
-			if (pm_runtime_active(ms_dev(host))) {
+			if (pm_runtime_active(ms_dev(host)))
 				ret = pm_runtime_put(ms_dev(host));
-				dev_dbg(ms_dev(host), "%s: pm_runtime_put: %d\n", __func__, ret);
-			}
 #endif
-		}
-		else
+		} else
 			err = -EINVAL;
 		break;
 
@@ -648,7 +671,7 @@ static int rtsx_usb_ms_resume(struct platform_device *pdev)
 
 #endif /* CONFIG_PM */
 
-static int rtsx_usb_detect_ms_card(void * __host)
+static int rtsx_usb_detect_ms_card(void *__host)
 {
 	struct rtsx_usb_ms *host = (struct rtsx_usb_ms *)__host;
 	struct rtsx_ucr *ucr = host->ucr;
@@ -714,7 +737,7 @@ static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
 
 	mutex_init(&host->host_mutex);
 	INIT_WORK(&host->handle_req, rtsx_usb_ms_handle_req);
-	
+
 	init_completion(&host->detect_ms_exit);
 	host->detect_ms = kthread_create(rtsx_usb_detect_ms_card, host,
 			"rtsx_usb_ms_%d", pdev->id);
@@ -768,7 +791,7 @@ static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
 		} while (!ret);
 	}
 	mutex_unlock(&host->host_mutex);
-	
+
 	wait_for_completion(&host->detect_ms_exit);
 	memstick_remove_host(msh);
 	memstick_free_host(msh);
