@@ -44,6 +44,7 @@ struct rtsx_usb_ms {
 
 	u8			ssc_depth;
 	unsigned int		clock;
+	int			power_mode;
 	unsigned char           ifmode;
 	bool			eject;
 };
@@ -581,20 +582,23 @@ static int rtsx_usb_ms_set_param(struct memstick_host *msh,
 
 	switch (param) {
 	case MEMSTICK_POWER:
+		if (value == host->power_mode)
+			break;
+
 		if (value == MEMSTICK_POWER_ON) {
 #ifdef CONFIG_PM_RUNTIME
-			if (pm_runtime_suspended(ms_dev(host)))
-				ret = pm_runtime_get_sync(ms_dev(host));
+			ret = pm_runtime_get_sync(ms_dev(host));
 #endif
 			err = ms_power_on(host);
 		} else if (value == MEMSTICK_POWER_OFF) {
 			err = ms_power_off(host);
 #ifdef CONFIG_PM_RUNTIME
-			if (pm_runtime_active(ms_dev(host)))
-				ret = pm_runtime_put(ms_dev(host));
+			ret = pm_runtime_put(ms_dev(host));
 #endif
 		} else
 			err = -EINVAL;
+		if (!err)
+			host->power_mode = value;
 		break;
 
 	case MEMSTICK_INTERFACE:
@@ -733,6 +737,7 @@ static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
 	host->ucr = ucr;
 	host->msh = msh;
 	host->pdev = pdev;
+	host->power_mode = MEMSTICK_POWER_OFF;
 	platform_set_drvdata(pdev, host);
 
 	mutex_init(&host->host_mutex);
