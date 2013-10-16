@@ -608,7 +608,7 @@ static int rtsx_usb_ms_set_param(struct memstick_host *msh,
 			err = rtsx_usb_write_register(ucr, MS_CFG,
 					0x18, MS_BUS_WIDTH_1);
 			if (err < 0)
-				goto out;
+				break;
 		} else if (value == MEMSTICK_PAR4) {
 			clock = 39000000;
 			ssc_depth = SSC_DEPTH_1M;
@@ -616,17 +616,17 @@ static int rtsx_usb_ms_set_param(struct memstick_host *msh,
 			err = rtsx_usb_write_register(ucr, MS_CFG,
 					0x58, MS_BUS_WIDTH_4 | PUSH_TIME_ODD);
 			if (err < 0)
-				goto out;
+				break;
 		} else {
 			err = -EINVAL;
-			goto out;
+			break;
 		}
 
 		err = rtsx_usb_switch_clock(ucr, clock,
 				ssc_depth, false, true, false);
 		if (err < 0) {
 			dev_dbg(ms_dev(host), "switch clock failed\n");
-			goto out;
+			break;
 		}
 
 		host->ssc_depth = ssc_depth;
