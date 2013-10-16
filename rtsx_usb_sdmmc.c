@@ -709,7 +709,7 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
 {
 	struct rtsx_usb_sdmmc *host = mmc_priv(mmc);
 	struct rtsx_ucr *ucr = host->ucr;
-	int ret;
+	int err;
 	u16 val;
 
 	if (host->host_removal)
@@ -718,13 +718,13 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
 	mutex_lock(&ucr->dev_mutex);
 
 	/* Check SD card detect */
-	ret = rtsx_usb_get_card_status(ucr, &val);
+	err = rtsx_usb_get_card_status(ucr, &val);
 
 	mutex_unlock(&ucr->dev_mutex);
 
 
 	/* Treat failed detection as non-ro */
-	if (ret)
+	if (err)
 		return 0;
 
 	if (val & SD_WP)
@@ -737,7 +737,7 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
 {
 	struct rtsx_usb_sdmmc *host = mmc_priv(mmc);
 	struct rtsx_ucr *ucr = host->ucr;
-	int ret;
+	int err;
 	u16 val;
 
 	if (host->host_removal)
@@ -746,12 +746,12 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
 	mutex_lock(&ucr->dev_mutex);
 
 	/* Check SD card detect */
-	ret = rtsx_usb_get_card_status(ucr, &val);
+	err = rtsx_usb_get_card_status(ucr, &val);
 
 	mutex_unlock(&ucr->dev_mutex);
 
 	/* Treat failed detection as non-exist */
-	if (ret)
+	if (err)
 		goto no_card;
 
 	if (val & SD_CD) {
@@ -998,7 +998,6 @@ static int sd_set_power_mode(struct rtsx_usb_sdmmc *host,
 		unsigned char power_mode)
 {
 	int err;
-	int ret;
 
 	if (power_mode != MMC_POWER_OFF)
 		power_mode = MMC_POWER_ON;
@@ -1009,11 +1008,11 @@ static int sd_set_power_mode(struct rtsx_usb_sdmmc *host,
 	if (power_mode == MMC_POWER_OFF) {
 		err = sd_power_off(host);
 #ifdef CONFIG_PM_RUNTIME
-		ret = pm_runtime_put(sdmmc_dev(host));
+		pm_runtime_put(sdmmc_dev(host));
 #endif
 	} else {
 #ifdef CONFIG_PM_RUNTIME
-		ret = pm_runtime_get_sync(sdmmc_dev(host));
+		pm_runtime_get_sync(sdmmc_dev(host));
 #endif
 		err = sd_power_on(host);
 	}
@@ -1344,7 +1343,7 @@ static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
 	struct rtsx_usb_sdmmc *host;
 	struct rtsx_ucr *ucr;
 #ifdef RTSX_USB_USE_LEDS_CLASS
-	int ret;
+	int err;
 #endif
 
 	ucr = *(struct rtsx_ucr **)pdev->dev.platform_data;
@@ -1377,10 +1376,10 @@ static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
 	host->led.default_trigger = mmc_hostname(mmc);
 	host->led.brightness_set = rtsx_usb_led_control;
 
-	ret = led_classdev_register(mmc_dev(mmc), &host->led);
-	if (ret)
+	err = led_classdev_register(mmc_dev(mmc), &host->led);
+	if (err)
 		dev_err(&(pdev->dev),
-				"Failed to register LED device: %d\n", ret);
+				"Failed to register LED device: %d\n", err);
 	INIT_WORK(&host->led_work, rtsx_usb_update_led);
 
 #endif

@@ -566,7 +566,6 @@ static int rtsx_usb_ms_set_param(struct memstick_host *msh,
 	unsigned int clock = 0;
 	u8 ssc_depth = 0;
 	int err;
-	int ret;
 
 	dev_dbg(ms_dev(host), "%s: param = %d, value = %d\n",
 			__func__, param, value);
@@ -587,13 +586,13 @@ static int rtsx_usb_ms_set_param(struct memstick_host *msh,
 
 		if (value == MEMSTICK_POWER_ON) {
 #ifdef CONFIG_PM_RUNTIME
-			ret = pm_runtime_get_sync(ms_dev(host));
+			pm_runtime_get_sync(ms_dev(host));
 #endif
 			err = ms_power_on(host);
 		} else if (value == MEMSTICK_POWER_OFF) {
 			err = ms_power_off(host);
 #ifdef CONFIG_PM_RUNTIME
-			ret = pm_runtime_put(ms_dev(host));
+			pm_runtime_put(ms_dev(host));
 #endif
 		} else
 			err = -EINVAL;
@@ -680,14 +679,14 @@ static int rtsx_usb_detect_ms_card(void *__host)
 	struct rtsx_usb_ms *host = (struct rtsx_usb_ms *)__host;
 	struct rtsx_ucr *ucr = host->ucr;
 	u8 val = 0;
-	int ret;
+	int err;
 
 	for (;;) {
 		mutex_lock(&ucr->dev_mutex);
 
 		/* Check pending MS card changes */
-		ret = rtsx_usb_read_register(ucr, CARD_INT_PEND, &val);
-		if (ret) {
+		err = rtsx_usb_read_register(ucr, CARD_INT_PEND, &val);
+		if (err) {
 			mutex_unlock(&ucr->dev_mutex);
 			goto poll_again;
 		}
@@ -720,7 +719,7 @@ static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
 	struct memstick_host *msh;
 	struct rtsx_usb_ms *host;
 	struct rtsx_ucr *ucr;
-	int ret;
+	int err;
 
 	ucr = *(struct rtsx_ucr **)pdev->dev.platform_data;
 	if (!ucr)
@@ -749,7 +748,7 @@ static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
 	if (IS_ERR(host->detect_ms)) {
 		dev_dbg(&(pdev->dev),
 				"Unable to create polling thread.\n");
-		ret = PTR_ERR(host->detect_ms);
+		err = PTR_ERR(host->detect_ms);
 		goto err_out;
 	}
 
@@ -760,22 +759,22 @@ static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
 #ifdef CONFIG_PM_RUNTIME
 	pm_runtime_enable(&pdev->dev);
 #endif
-	ret = memstick_add_host(msh);
-	if (ret)
+	err = memstick_add_host(msh);
+	if (err)
 		goto err_out;
 
 	wake_up_process(host->detect_ms);
 	return 0;
 err_out:
 	memstick_free_host(msh);
-	return ret;
+	return err;
 }
 
 static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
 {
 	struct rtsx_usb_ms *host = platform_get_drvdata(pdev);
 	struct memstick_host *msh;
-	int ret;
+	int err;
 
 	if (!host)
 		return 0;
@@ -790,10 +789,10 @@ static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
 			dev_name(&msh->dev));
 		host->req->error = -ENOMEDIUM;
 		do {
-			ret = memstick_next_req(msh, &host->req);
-			if (!ret)
+			err = memstick_next_req(msh, &host->req);
+			if (!err)
 				host->req->error = -ENOMEDIUM;
-		} while (!ret);
+		} while (!err);
 	}
 	mutex_unlock(&host->host_mutex);
 
