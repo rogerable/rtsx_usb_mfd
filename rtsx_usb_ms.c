@@ -573,11 +573,8 @@ static int rtsx_usb_ms_set_param(struct memstick_host *msh,
 	mutex_lock(&ucr->dev_mutex);
 
 	err = rtsx_usb_card_exclusive_check(ucr, RTSX_USB_MS_CARD);
-	if (err) {
-		dev_dbg(ms_dev(host), "%s: Exclusive check sucks\n",
-				__func__);
+	if (err)
 		goto out;
-	}
 
 	switch (param) {
 	case MEMSTICK_POWER:
